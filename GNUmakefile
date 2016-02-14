@@ -1,19 +1,23 @@
-SRCS=		luaunix.c select.c
+-include ../GNUmakefile.inc
+
+SRCS=		luaunix.c pwd.c select.c
 LIB=		unix
 
-LUAVER=		`lua -v 2>&1 | cut -c 5-7`
+LUAVER?=	$(shell lua -v 2>&1 | cut -c 5-7)
+LUAINC?=	/usr/include/lua${LUAVER}
 
-CFLAGS+=	-Wall -O3 -fPIC -I/usr/include -I/usr/include/lua${LUAVER}
+CFLAGS+=	-Wall -O3 -fPIC -I/usr/include -I${LUAINC}
 LDADD+=		-L${XDIR}/lib -L${PKGDIR}/lib -lbsd -lcrypt
 
 PKGDIR=		/usr
-LIBDIR=		${PKGDIR}/lib
-LUADIR=		${LIBDIR}/lua/${LUAVER}
+
+LIBDIR=		/usr/lib/lua/${LUAVER}
+
 ${LIB}.so:	${SRCS:.c=.o}
 		cc -shared -o ${LIB}.so ${CFLAGS} ${SRCS:.c=.o} ${LDADD}
 
 clean:
 		rm -f *.o *.so
 install:
-	-mkdir -p ${DESTDIR}${LUADIR}
-	install -m 755 ${LIB}.so ${DESTDIR}${LUADIR}/${LIB}.so
+	-mkdir -p ${DESTDIR}${LIBDIR}
+	install -m 755 ${LIB}.so ${DESTDIR}${LIBDIR}

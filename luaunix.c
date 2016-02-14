@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2015, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2011 - 2016, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#include "luaunix.h"
+#include "pwd.h"
 #include "select.h"
 
 extern char *crypt(const char *key, const char *salt);
@@ -251,165 +253,6 @@ unix_signal(lua_State *L)
 }
 
 static int
-unix_setpwent(lua_State *L)
-{
-	setpwent();
-	return 0;
-}
-
-static int
-unix_endpwent(lua_State *L)
-{
-	endpwent();
-	return 0;
-}
-
-static void
-unix_pushpasswd(lua_State *L, struct passwd *pwd)
-{
-	lua_newtable(L);
-	lua_pushstring(L, pwd->pw_name);
-	lua_setfield(L, -2, "pw_name");
-	lua_pushstring(L, pwd->pw_passwd);
-	lua_setfield(L, -2, "pw_passwd");
-	lua_pushinteger(L, pwd->pw_uid);
-	lua_setfield(L, -2, "pw_uid");
-	lua_pushinteger(L, pwd->pw_gid);
-	lua_setfield(L, -2, "pw_gid");
-	lua_pushstring(L, pwd->pw_gecos);
-	lua_setfield(L, -2, "pw_gecos");
-	lua_pushstring(L, pwd->pw_dir);
-	lua_setfield(L, -2, "pw_dir");
-	lua_pushstring(L, pwd->pw_shell);
-	lua_setfield(L, -2, "pw_shell");
-}
-
-static int
-unix_getpwent(lua_State *L)
-{
-	struct passwd *pwd;
-
-	pwd = getpwent();
-	if (pwd != NULL)
-		unix_pushpasswd(L, pwd);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-
-static int
-unix_getpwnam(lua_State *L)
-{
-	struct passwd *pwd;
-
-	pwd = getpwnam(luaL_checkstring(L, 1));
-	if (pwd != NULL)
-		unix_pushpasswd(L, pwd);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-
-static int
-unix_getpwuid(lua_State *L)
-{
-	struct passwd *pwd;
-
-	pwd = getpwuid(luaL_checkinteger(L, 1));
-	if (pwd != NULL)
-		unix_pushpasswd(L, pwd);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-
-#ifdef __linux__
-static void
-unix_pushspasswd(lua_State *L, struct spwd *spwd)
-{
-	lua_newtable(L);
-	lua_pushstring(L, spwd->sp_namp);
-	lua_setfield(L, -2, "sp_namp");
-	lua_pushstring(L, spwd->sp_pwdp);
-	lua_setfield(L, -2, "sp_pwdp");
-	lua_pushinteger(L, spwd->sp_lstchg);
-	lua_setfield(L, -2, "sp_lstchg");
-	lua_pushinteger(L, spwd->sp_min);
-	lua_setfield(L, -2, "sp_min");
-	lua_pushinteger(L, spwd->sp_max);
-	lua_setfield(L, -2, "sp_max");
-	lua_pushinteger(L, spwd->sp_warn);
-	lua_setfield(L, -2, "sp_warn");
-	lua_pushinteger(L, spwd->sp_inact);
-	lua_setfield(L, -2, "sp_inact");
-	lua_pushinteger(L, spwd->sp_expire);
-	lua_setfield(L, -2, "sp_expire");
-}
-
-static int
-unix_getspnam(lua_State *L)
-{
-	struct spwd *spwd;
-
-	spwd = getspnam(luaL_checkstring(L, 1));
-	if (spwd != NULL)
-		unix_pushspasswd(L, spwd);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-#endif
-
-static void
-unix_pushgroup(lua_State *L, struct group *grp)
-{
-	int n;
-	char **mem;
-
-	lua_newtable(L);
-	lua_pushstring(L, grp->gr_name);
-	lua_setfield(L, -2, "gr_name");
-	lua_pushstring(L, grp->gr_passwd);
-	lua_setfield(L, -2, "gr_passwd");
-	lua_pushinteger(L, grp->gr_gid);
-	lua_setfield(L, -2, "gr_gid");
-	lua_newtable(L);
-
-	for (n = 1, mem = grp->gr_mem; *mem != NULL; mem++, n++) {
-		lua_pushinteger(L, n);
-		lua_pushstring(L, *mem);
-		lua_settable(L, -3);
-	}
-	lua_setfield(L, -2, "gr_mem");
-}
-
-static int
-unix_getgrnam(lua_State *L)
-{
-	struct group *grp;
-
-	grp = getgrnam(luaL_checkstring(L, 1));
-	if (grp != NULL)
-		unix_pushgroup(L, grp);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-
-static int
-unix_getgrgid(lua_State *L)
-{
-	struct group *grp;
-
-	grp = getgrgid(luaL_checkinteger(L, 1));
-	if (grp != NULL)
-		unix_pushgroup(L, grp);
-	else
-		lua_pushnil(L);
-	return 1;
-}
-
-static int
 unix_gethostname(lua_State *L)
 {
 	char name[128];
@@ -474,23 +317,16 @@ static void
 unix_set_info(lua_State *L)
 {
 	lua_pushliteral(L, "_COPYRIGHT");
-	lua_pushliteral(L, "Copyright (C) 2012 - 2015 by "
+	lua_pushliteral(L, "Copyright (C) 2012 - 2016 by "
 	    "micro systems marc balmer");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_DESCRIPTION");
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.2.6");
+	lua_pushliteral(L, "unix 1.2.7");
 	lua_settable(L, -3);
 }
-
-struct constant {
-	char *name;
-	int value;
-};
-
-#define CONSTANT(NAME)		{ #NAME, NAME }
 
 static struct constant unix_constant[] = {
 	/* file modes */

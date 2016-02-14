@@ -32,12 +32,12 @@
 
 #define FD_SET_METATABLE	"fdset methods"
 
-extern int unix_fd_set(lua_State *L);
-extern int unix_fd_set_clr(lua_State *L);
-extern int unix_fd_set_isset(lua_State *L);
-extern int unix_fd_set_set(lua_State *L);
-extern int unix_fd_set_zero(lua_State *L);
+extern int unix_fd_set(lua_State *);
+extern int unix_fd_set_clr(lua_State *);
+extern int unix_fd_set_isset(lua_State *);
+extern int unix_fd_set_set(lua_State *);
+extern int unix_fd_set_zero(lua_State *);
 
-extern int unix_select(lua_State *L);
+extern int unix_select(lua_State *);
 
 #endif /* __SELECT_H__ */
