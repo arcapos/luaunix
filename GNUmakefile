@@ -1,6 +1,6 @@
 -include ../GNUmakefile.inc
 
-SRCS=		luaunix.c pwd.c select.c
+SRCS=		luaunix.c pwd.c select.c dirent.c
 LIB=		unix
 
 LUAVER?=	$(shell lua -v 2>&1 | cut -c 5-7)
