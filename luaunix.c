@@ -50,6 +50,7 @@
 #include <unistd.h>
 
 #include "luaunix.h"
+#include "dirent.h"
 #include "pwd.h"
 #include "select.h"
 
@@ -233,6 +234,35 @@ unix_stat(lua_State *L)
 }
 
 static int
+unix_mkstemp(lua_State *L)
+{
+	int fd;
+	char *tmpnam;
+
+	tmpnam = strdup(luaL_checkstring(L, 1));
+
+	fd = mkstemp(tmpnam);
+	if (fd == -1) {
+		lua_pushnil(L);
+		lua_pushnil(L);
+	} else {
+		lua_pushinteger(L, fd);
+		lua_pushstring(L, tmpnam);
+	}
+	free(tmpnam);
+	return 2;
+}
+
+static int
+unix_ftruncate(lua_State *L)
+{
+	lua_pushboolean(L,
+	    ftruncate(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2))
+	    ? 0 : 1);
+	return 1;
+}
+
+static int
 unix_crypt(lua_State *L)
 {
 	lua_pushstring(L, crypt(luaL_checkstring(L, 1),
@@ -324,7 +354,7 @@ unix_set_info(lua_State *L)
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.2.7");
+	lua_pushliteral(L, "unix 1.2.8");
 	lua_settable(L, -3);
 }
 
@@ -445,6 +475,8 @@ luaopen_unix(lua_State *L)
 		{ "chmod",	unix_chmod },
 		{ "rename",	unix_rename },
 		{ "stat",	unix_stat },
+		{ "mkstemp",	unix_mkstemp },
+		{ "ftruncate",	unix_ftruncate },
 
 		/* crypt */
 		{ "crypt",	unix_crypt },
@@ -457,6 +489,10 @@ luaopen_unix(lua_State *L)
 		{ "getpwent",	unix_getpwent },
 		{ "getpwnam",	unix_getpwnam },
 		{ "getpwuid",	unix_getpwuid },
+
+		/* dirent */
+		{ "opendir",	unix_opendir },
+
 #ifdef __linux__
 		/* shadow password */
 		{ "getspnam",	unix_getspnam },
@@ -487,6 +523,15 @@ luaopen_unix(lua_State *L)
 		{ "zero",	unix_fd_set_zero },
 		{ NULL,		NULL }
 	};
+	struct luaL_Reg dir_methods[] = {
+		{ "__gc",	unix_closedir },
+		{ "readdir",	unix_readdir },
+		{ "telldir",	unix_telldir },
+		{ "seekdir",	unix_seekdir },
+		{ "rewinddir",	unix_rewinddir },
+		{ "closedir",	unix_closedir },
+		{ NULL,		NULL }
+	};
 
 	if (luaL_newmetatable(L, FD_SET_METATABLE)) {
 #if LUA_VERSION_NUM >= 502
@@ -499,6 +544,23 @@ luaopen_unix(lua_State *L)
 		lua_pushcfunction(L, fd_set_clear);
 		lua_settable(L, -3);
 #endif
+		lua_pushliteral(L, "__index");
+		lua_pushvalue(L, -2);
+		lua_settable(L, -3);
+
+		lua_pushliteral(L, "__metatable");
+		lua_pushliteral(L, "must not access this metatable");
+		lua_settable(L, -3);
+	}
+	lua_pop(L, 1);
+
+	if (luaL_newmetatable(L, DIR_METATABLE)) {
+#if LUA_VERSION_NUM >= 502
+		luaL_setfuncs(L, dir_methods, 0);
+#else
+		luaL_register(L, NULL, dir_methods);
+#endif
+
 		lua_pushliteral(L, "__index");
 		lua_pushvalue(L, -2);
 		lua_settable(L, -3);
