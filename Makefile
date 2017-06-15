@@ -1,4 +1,4 @@
-SRCS=		luaunix.c pwd.c select.c
+SRCS=		luaunix.c pwd.c select.c dirent.c
 LIB=		unix
 
 OS!=		uname
