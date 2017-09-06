@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2016, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2011 - 2017, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 #include "dirent.h"
 #include "pwd.h"
 #include "select.h"
+#include "dl.h"
 
 extern char *crypt(const char *key, const char *salt);
 typedef void (*sighandler_t)(int);
@@ -347,14 +348,14 @@ static void
 unix_set_info(lua_State *L)
 {
 	lua_pushliteral(L, "_COPYRIGHT");
-	lua_pushliteral(L, "Copyright (C) 2012 - 2016 by "
+	lua_pushliteral(L, "Copyright (C) 2012 - 2017 by "
 	    "micro systems marc balmer");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_DESCRIPTION");
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.2.8");
+	lua_pushliteral(L, "unix 1.2.9");
 	lua_settable(L, -3);
 }
 
@@ -493,6 +494,12 @@ luaopen_unix(lua_State *L)
 		/* dirent */
 		{ "opendir",	unix_opendir },
 
+		/* dynamic linker */
+		{ "dlopen",	unix_dlopen },
+		{ "dlerror",	unix_dlerror },
+		{ "dlsym",	unix_dlsym },
+		{ "dlclose",	unix_dlclose },
+
 #ifdef __linux__
 		/* shadow password */
 		{ "getspnam",	unix_getspnam },
@@ -532,7 +539,11 @@ luaopen_unix(lua_State *L)
 		{ "closedir",	unix_closedir },
 		{ NULL,		NULL }
 	};
-
+	struct luaL_Reg dl_methods[] = {
+		{ "__gc",	unix_dlclose },
+		{ "__index",	unix_dlsym },
+		{ NULL,		NULL }
+	};
 	if (luaL_newmetatable(L, FD_SET_METATABLE)) {
 #if LUA_VERSION_NUM >= 502
 		luaL_setfuncs(L, fd_set_methods, 0);
@@ -565,6 +576,30 @@ luaopen_unix(lua_State *L)
 		lua_pushvalue(L, -2);
 		lua_settable(L, -3);
 
+		lua_pushliteral(L, "__metatable");
+		lua_pushliteral(L, "must not access this metatable");
+		lua_settable(L, -3);
+	}
+	lua_pop(L, 1);
+	if (luaL_newmetatable(L, DL_METATABLE)) {
+#if LUA_VERSION_NUM >= 502
+		luaL_setfuncs(L, dl_methods, 0);
+#else
+		luaL_register(L, NULL, dl_methods);
+#endif
+
+#if 0
+		lua_pushliteral(L, "__index");
+		lua_pushvalue(L, -2);
+		lua_settable(L, -3);
+#endif
+
+		lua_pushliteral(L, "__metatable");
+		lua_pushliteral(L, "must not access this metatable");
+		lua_settable(L, -3);
+	}
+	lua_pop(L, 1);
+	if (luaL_newmetatable(L, DLSYM_METATABLE)) {
 		lua_pushliteral(L, "__metatable");
 		lua_pushliteral(L, "must not access this metatable");
 		lua_settable(L, -3);
