@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "luaunix.h"
 #include "dirent.h"
@@ -450,6 +451,14 @@ static struct constant unix_constant[] = {
 	CONSTANT(LOG_INFO),
 	CONSTANT(LOG_DEBUG),
 
+	/* dlopen flags */
+	CONSTANT(RTLD_LAZY),
+	CONSTANT(RTLD_NOW),
+	CONSTANT(RTLD_GLOBAL),
+	CONSTANT(RTLD_LOCAL),
+	CONSTANT(RTLD_NODELETE),
+	CONSTANT(RTLD_NOLOAD),
+	CONSTANT(RTLD_DEEPBIND),
 	{ NULL, 0 }
 };
 
