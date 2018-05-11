@@ -64,8 +64,10 @@ unix_readdir(lua_State *L)
 		lua_newtable(L);
 		lua_pushinteger(L, dirent->d_ino);
 		lua_setfield(L, -2, "d_ino");
+		#ifdef __linux__
 		lua_pushinteger(L, dirent->d_off);
 		lua_setfield(L, -2, "d_off");
+		#endif
 		lua_pushinteger(L, dirent->d_reclen);
 		lua_setfield(L, -2, "d_reclen");
 		lua_pushinteger(L, dirent->d_type);
