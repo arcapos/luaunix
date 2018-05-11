@@ -49,6 +49,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <string.h>
 
 #include "luaunix.h"
 #include "dirent.h"
