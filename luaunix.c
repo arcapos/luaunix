@@ -458,7 +458,9 @@ static struct constant unix_constant[] = {
 	CONSTANT(RTLD_LOCAL),
 	CONSTANT(RTLD_NODELETE),
 	CONSTANT(RTLD_NOLOAD),
+	#ifdef __GLIBC__
 	CONSTANT(RTLD_DEEPBIND),
+	#endif
 	{ NULL, 0 }
 };
 
