@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2017, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2011 - 2018, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -209,11 +209,11 @@ unix_stat(lua_State *L)
 		lua_pushinteger(L, statbuf.st_dev);
 		lua_setfield(L, -2, "st_uid");
 		lua_pushinteger(L, statbuf.st_ino);
-		lua_setfield(L, -2, "st_uid");
+		lua_setfield(L, -2, "st_ino");
 		lua_pushinteger(L, statbuf.st_mode);
-		lua_setfield(L, -2, "st_uid");
+		lua_setfield(L, -2, "st_mode");
 		lua_pushinteger(L, statbuf.st_nlink);
-		lua_setfield(L, -2, "st_uid");
+		lua_setfield(L, -2, "st_nlink");
 		lua_pushinteger(L, statbuf.st_uid);
 		lua_setfield(L, -2, "st_uid");
 		lua_pushinteger(L, statbuf.st_gid);
@@ -350,14 +350,14 @@ static void
 unix_set_info(lua_State *L)
 {
 	lua_pushliteral(L, "_COPYRIGHT");
-	lua_pushliteral(L, "Copyright (C) 2012 - 2017 by "
+	lua_pushliteral(L, "Copyright (C) 2012 - 2018 by "
 	    "micro systems marc balmer");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_DESCRIPTION");
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.2.9");
+	lua_pushliteral(L, "unix 1.3.1");
 	lua_settable(L, -3);
 }
 
