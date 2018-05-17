@@ -1,4 +1,4 @@
-SRCS=		luaunix.c pwd.c select.c dirent.c
+SRCS=		dirent.c dl.c luaunix.c pwd.c select.c
 LIB=		unix
 
 OS!=		uname
@@ -9,7 +9,7 @@ OPENGL ?=	no
 .if ${OS} == "NetBSD"
 XDIR=		${X11ROOTDIR}
 LOCALBASE?=	/usr/pkg
-LDADD+=		-R/usr/lib -R${LOCALBASE}/lib
+LDADD+=		-R/usr/lib -R${LOCALBASE}/lib -lcrypto
 .else
 LOCALBASE=	/usr/local
 .endif
