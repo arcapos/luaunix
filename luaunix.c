@@ -459,9 +459,9 @@ static struct constant unix_constant[] = {
 	CONSTANT(RTLD_LOCAL),
 	CONSTANT(RTLD_NODELETE),
 	CONSTANT(RTLD_NOLOAD),
-	#ifdef __GLIBC__
+#ifdef __GLIBC__
 	CONSTANT(RTLD_DEEPBIND),
-	#endif
+#endif
 	{ NULL, 0 }
 };
 
@@ -557,11 +557,7 @@ luaopen_unix(lua_State *L)
 		{ NULL,		NULL }
 	};
 	if (luaL_newmetatable(L, FD_SET_METATABLE)) {
-#if LUA_VERSION_NUM >= 502
 		luaL_setfuncs(L, fd_set_methods, 0);
-#else
-		luaL_register(L, NULL, fd_set_methods);
-#endif
 #if 0
 		lua_pushliteral(L, "__gc");
 		lua_pushcfunction(L, fd_set_clear);
@@ -578,11 +574,7 @@ luaopen_unix(lua_State *L)
 	lua_pop(L, 1);
 
 	if (luaL_newmetatable(L, DIR_METATABLE)) {
-#if LUA_VERSION_NUM >= 502
 		luaL_setfuncs(L, dir_methods, 0);
-#else
-		luaL_register(L, NULL, dir_methods);
-#endif
 
 		lua_pushliteral(L, "__index");
 		lua_pushvalue(L, -2);
@@ -594,11 +586,7 @@ luaopen_unix(lua_State *L)
 	}
 	lua_pop(L, 1);
 	if (luaL_newmetatable(L, DL_METATABLE)) {
-#if LUA_VERSION_NUM >= 502
 		luaL_setfuncs(L, dl_methods, 0);
-#else
-		luaL_register(L, NULL, dl_methods);
-#endif
 
 #if 0
 		lua_pushliteral(L, "__index");
@@ -618,11 +606,7 @@ luaopen_unix(lua_State *L)
 	}
 	lua_pop(L, 1);
 
-#if LUA_VERSION_NUM >= 502
 	luaL_newlib(L, luaunix);
-#else
-	luaL_register(L, "unix", luaunix);
-#endif
 	unix_set_info(L);
 	for (n = 0; unix_constant[n].name != NULL; n++) {
 		lua_pushinteger(L, unix_constant[n].value);
