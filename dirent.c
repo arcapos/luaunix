@@ -112,5 +112,5 @@ unix_closedir(lua_State *L)
 		*dirp = NULL;
 	} else
 		lua_pushboolean(L, 0);
-	return 0;
+	return 1;
 }
