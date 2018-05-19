@@ -113,9 +113,8 @@ unix_kill(lua_State *L)
 static int
 unix_getcwd(lua_State *L)
 {
-	char *cwd;
+	char cwd[PATH_MAX];
 
-	cwd = alloca(PATH_MAX);
 	if (getcwd(cwd, PATH_MAX) != NULL)
 		lua_pushstring(L, cwd);
 	else
