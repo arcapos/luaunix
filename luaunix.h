@@ -31,7 +31,7 @@
 #define __LUAUNIX_H__
 
 struct constant {
-	char *name;
+	const char *name;
 	int value;
 };
 
