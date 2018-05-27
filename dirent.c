@@ -59,8 +59,6 @@ unix_readdir(lua_State *L)
 	dirp = luaL_checkudata(L, 1, DIR_METATABLE);
 	dirent = readdir(*dirp);
 	if (dirent != NULL) {
-		size_t len = 1;
-
 		lua_newtable(L);
 		lua_pushinteger(L, dirent->d_ino);
 		lua_setfield(L, -2, "d_ino");
