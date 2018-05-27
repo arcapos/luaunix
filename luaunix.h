@@ -37,4 +37,6 @@ struct constant {
 
 #define CONSTANT(NAME)		{ #NAME, NAME }
 
+int luaopen_unix(lua_State *);
+
 #endif /* __LUAUNIX_H__ */

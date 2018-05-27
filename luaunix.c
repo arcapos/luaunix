@@ -60,8 +60,6 @@
 extern char *crypt(const char *key, const char *salt);
 typedef void (*sighandler_t)(int);
 
-int luaopen_unix(lua_State *);
-
 static void
 reaper(int signal)
 {
