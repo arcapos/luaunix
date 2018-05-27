@@ -36,17 +36,15 @@
 int
 unix_opendir(lua_State *L)
 {
-	DIR *dirp;
 	DIR **dirpp;
+	const char *dir = luaL_checkstring(L, 1);
 
-	dirp = opendir(luaL_checkstring(L, 1));
-	if (dirp == NULL)
+	dirpp = lua_newuserdata(L, sizeof(DIR *));
+	*dirpp = opendir(dir);
+	if (*dirpp == NULL)
 		lua_pushnil(L);
-	else {
-		dirpp = lua_newuserdata(L, sizeof(DIR **));
-		*dirpp = dirp;
+	else
 		luaL_setmetatable(L, DIR_METATABLE);
-	}
 	return 1;
 }
 
