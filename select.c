@@ -93,7 +93,7 @@ unix_fd_set_zero(lua_State *L)
 int
 unix_select(lua_State *L)
 {
-	struct timeval *tv;
+	struct timeval *tv, tval;
 	fd_set *readfds, *writefds, *errorfds;
 	int nfds;
 
@@ -110,21 +110,20 @@ unix_select(lua_State *L)
 
 	switch (lua_gettop(L)) {
 	case 5:
-		tv = malloc(sizeof(struct timeval));
-		tv->tv_sec = 0;
-		tv->tv_usec = lua_tointeger(L, 5);
+		tv = &tval;
+		tval.tv_sec = 0;
+		tval.tv_usec = lua_tointeger(L, 5);
 		break;
 	case 6:
-		tv = malloc(sizeof(struct timeval));
-		tv->tv_sec = lua_tointeger(L, 5);
-		tv->tv_usec = lua_tointeger(L, 6);
+		tv = &tval;
+		tval.tv_sec = lua_tointeger(L, 5);
+		tval.tv_usec = lua_tointeger(L, 6);
 		break;
 	default:
 		tv = NULL;
 	}
 
 	lua_pushinteger(L, select(nfds, readfds, writefds, errorfds, tv));
-	free(tv);
 
 	return 1;
 }
