@@ -281,7 +281,7 @@ static int
 unix_setenv(lua_State *L)
 {
 	lua_pushboolean(L, setenv(luaL_checkstring(L, 1),
-	    luaL_checkstring(L, 2), lua_toboolean(L, 3) ? 0 : 1));
+	    luaL_checkstring(L, 2), lua_toboolean(L, 3)) ? 0 : 1);
 	return 1;
 }
 
