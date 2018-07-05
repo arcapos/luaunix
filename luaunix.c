@@ -265,6 +265,34 @@ unix_ftruncate(lua_State *L)
 }
 
 static int
+unix_getenv(lua_State *L)
+{
+	char *v;
+
+	v = getenv(luaL_checkstring(L, 1));
+	if (v)
+		lua_pushstring(L, v);
+	else
+		lua_pushnil(L);
+	return 1;
+}
+
+static int
+unix_setenv(lua_State *L)
+{
+	lua_pushboolean(L, setenv(luaL_checkstring(L, 1),
+	    luaL_checkstring(L, 2), luaL_checkboolean(L, 3) ? 0 : 1));
+	return 1;
+}
+
+static int
+unix_unsetenv(lua_State *L)
+{
+	lua_pushboolean(L, unsetenv(luaL_checkstring(L, 1)) ? 0 : 1);
+	return 1;
+}
+
+static int
 unix_crypt(lua_State *L)
 {
 	lua_pushstring(L, crypt(luaL_checkstring(L, 1),
@@ -356,7 +384,7 @@ unix_set_info(lua_State *L)
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.3.1");
+	lua_pushliteral(L, "unix 1.3.2");
 	lua_settable(L, -3);
 }
 
@@ -489,6 +517,11 @@ luaopen_unix(lua_State *L)
 		{ "stat",	unix_stat },
 		{ "mkstemp",	unix_mkstemp },
 		{ "ftruncate",	unix_ftruncate },
+
+		/* environment */
+		{ "getenv",	unix_getenv },
+		{ "setenv",	unix_setenv },
+		{ "unsetenv",	unix_unsetenv },
 
 		/* crypt */
 		{ "crypt",	unix_crypt },
