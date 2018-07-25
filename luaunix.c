@@ -352,10 +352,46 @@ unix_openlog(lua_State *L)
 	return 0;
 }
 
+static int priorities[] = {
+	LOG_EMERG,
+	LOG_ALERT,
+	LOG_CRIT,
+	LOG_ERR,
+	LOG_WARNING,
+	LOG_NOTICE,
+	LOG_INFO,
+	LOG_DEBUG
+};
+
+static const char *priority_names[] = {
+	"emerg",
+	"alert",
+	"crit",
+	"err",
+	"warning",
+	"notice",
+	"info",
+	"debug",
+	NULL
+};
+
 static int
 unix_syslog(lua_State *L)
 {
-	syslog(luaL_checkinteger(L, 1), "%s", luaL_checkstring(L, 2));
+	int prio;
+
+	switch (lua_type(L, 1)) {
+	case LUA_TNUMBER:
+		prio = lua_tointeger(L, 1);
+		break;
+	case LUA_TSTRING:
+		prio = priorities[luaL_checkoption(L, 1, NULL, priority_names)];
+		break;
+	default:
+		return luaL_error(L, "unknown syslog priority");
+	}
+
+	syslog(prio, "%s", luaL_checkstring(L, 2));
 	return 0;
 }
 
@@ -384,7 +420,7 @@ unix_set_info(lua_State *L)
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.3.2");
+	lua_pushliteral(L, "unix 1.3.3");
 	lua_settable(L, -3);
 }
 
