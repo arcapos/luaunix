@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2017- 2019 Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,44 @@
 
 #include "dl.h"
 
+static int dlopen_flags[] = {
+	RTLD_LAZY,
+	RTLD_NOW,
+	RTLD_GLOBAL,
+	RTLD_LOCAL,
+	RTLD_NODELETE,
+	RTLD_NOLOAD,
+#ifdef __GLIBC__
+	RTLD_DEEPBIND
+#endif
+};
+
+static const char *dlopen_options[] = {
+	"lazy",
+	"now",
+	"global",
+	"local",
+	"nodelete",
+	"noload",
+#ifdef __GLIBC__
+	"deepbind",
+#endif
+	NULL
+};
+
 int
 unix_dlopen(lua_State *L)
 {
-	void *p;
-	void **pp;
+	void *p, **pp;
+	int n, flags;
 
-	p = dlopen(luaL_checkstring(L, 1), luaL_checkinteger(L, 2));
-	if (p == NULL)
-		lua_pushnil(L);
+	for (flags = 0, n = 2; n <= lua_gettop(L); n++)
+		flags |= dlopen_flags[luaL_checkoption(L, n, NULL,
+		    dlopen_options)];
+
+	p = dlopen(luaL_checkstring(L, 1), flags);
+	if (!p)
+		return luaL_error(L, dlerror());
 	else {
 		pp = lua_newuserdata(L, sizeof(void **));
 		*pp = p;
@@ -60,17 +89,17 @@ unix_dlerror(lua_State *L)
 int
 unix_dlsym(lua_State *L)
 {
-	void **p, **s;
-	void *symbol;
+	void **p, **s, *symbol;
 
 	p = luaL_checkudata(L, 1, DL_METATABLE);
 	symbol = dlsym(*p, luaL_checkstring(L, 2));
-	if (symbol) {
+	if (!symbol)
+		return luaL_error(L, dlerror());
+	else {
 		s = lua_newuserdata(L, sizeof(void **));
 		*s = symbol;
 		luaL_setmetatable(L, DLSYM_METATABLE);
-	} else
-		lua_pushnil(L);
+	}
 	return 1;
 }
 
@@ -80,7 +109,7 @@ unix_dlclose(lua_State *L)
 	void **p = luaL_checkudata(L, 1, DL_METATABLE);
 
 	if (*p) {
-		lua_pushinteger(L, dlclose(*p));
+		lua_pushboolean(L, dlclose(*p) == 0 ? 1 : 0);
 		*p = NULL;
 		return 1;
 	} else

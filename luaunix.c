@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2018, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2011 - 2019, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -413,14 +413,14 @@ static void
 unix_set_info(lua_State *L)
 {
 	lua_pushliteral(L, "_COPYRIGHT");
-	lua_pushliteral(L, "Copyright (C) 2012 - 2018 by "
+	lua_pushliteral(L, "Copyright (C) 2012 - 2019 by "
 	    "micro systems marc balmer");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_DESCRIPTION");
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.3.3");
+	lua_pushliteral(L, "unix 1.4.0");
 	lua_settable(L, -3);
 }
 
@@ -515,16 +515,6 @@ static struct constant unix_constant[] = {
 	CONSTANT(LOG_INFO),
 	CONSTANT(LOG_DEBUG),
 
-	/* dlopen flags */
-	CONSTANT(RTLD_LAZY),
-	CONSTANT(RTLD_NOW),
-	CONSTANT(RTLD_GLOBAL),
-	CONSTANT(RTLD_LOCAL),
-	CONSTANT(RTLD_NODELETE),
-	CONSTANT(RTLD_NOLOAD),
-#ifdef __GLIBC__
-	CONSTANT(RTLD_DEEPBIND),
-#endif
 	{ NULL, 0 }
 };
 
