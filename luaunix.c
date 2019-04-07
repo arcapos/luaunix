@@ -338,16 +338,85 @@ unix_sethostname(lua_State *L)
 	return 1;
 }
 
+static int syslog_options[] = {
+	LOG_CONS,
+	LOG_NDELAY,
+	LOG_NOWAIT,
+	LOG_ODELAY,
+	LOG_PERROR,
+	LOG_PID
+};
+
+static const char *syslog_option_names[] = {
+	"cons",
+	"ndelay",
+	"nowait",
+	"odelay",
+	"perror",
+	"pid",
+	NULL
+};
+
+static int syslog_facilities[] = {
+	LOG_AUTH,
+	LOG_AUTHPRIV,
+	LOG_CRON,
+	LOG_DAEMON,
+	LOG_FTP,
+	LOG_KERN,
+	LOG_LOCAL0,
+	LOG_LOCAL1,
+	LOG_LOCAL2,
+	LOG_LOCAL3,
+	LOG_LOCAL4,
+	LOG_LOCAL5,
+	LOG_LOCAL6,
+	LOG_LOCAL7,
+	LOG_LPR,
+	LOG_MAIL,
+	LOG_NEWS,
+	LOG_SYSLOG,
+	LOG_USER,
+	LOG_UUCP
+};
+
+static const char *syslog_facility_names[] = {
+	"auth",
+	"authpriv",
+	"cron",
+	"daemon",
+	"ftp",
+	"kern",
+	"local0",
+	"local1",
+	"local2",
+	"local3",
+	"local4",
+	"local5",
+	"local6",
+	"local7",
+	"lpr",
+	"mail",
+	"news",
+	"syslog",
+	"user",
+	"uucp",
+	NULL
+};
+
 static int
 unix_openlog(lua_State *L)
 {
 	const char *ident;
-	int option;
-	int facility;
+	int n, option, facility;
 
 	ident = luaL_checkstring(L, 1);
-	option = luaL_checkinteger(L, 2);
-	facility = luaL_checkinteger(L, 3);
+
+	for (option = 0, n = 2; n < lua_gettop(L); n++)
+		option |= syslog_options[luaL_checkoption(L, n, NULL,
+		    syslog_option_names)];
+	facility = syslog_facilities[luaL_checkoption(L, n, NULL,
+	    syslog_facility_names)];
 	openlog(ident, option, facility);
 	return 0;
 }
@@ -378,20 +447,8 @@ static const char *priority_names[] = {
 static int
 unix_syslog(lua_State *L)
 {
-	int prio;
-
-	switch (lua_type(L, 1)) {
-	case LUA_TNUMBER:
-		prio = lua_tointeger(L, 1);
-		break;
-	case LUA_TSTRING:
-		prio = priorities[luaL_checkoption(L, 1, NULL, priority_names)];
-		break;
-	default:
-		return luaL_error(L, "unknown syslog priority");
-	}
-
-	syslog(prio, "%s", luaL_checkstring(L, 2));
+	syslog(priorities[luaL_checkoption(L, 1, NULL, priority_names)], "%s",
+	    luaL_checkstring(L, 2));
 	return 0;
 }
 
@@ -420,7 +477,7 @@ unix_set_info(lua_State *L)
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.4.0");
+	lua_pushliteral(L, "unix 1.4.1");
 	lua_settable(L, -3);
 }
 

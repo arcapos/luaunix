@@ -195,10 +195,10 @@ Set the hostname, returns true on success, nil on error.
 Using the system log
 ~~~~~~~~~~~~~~~~~~~~
 
-openlog(ident, option, facility)
+openlog(ident, option, [option, ] facility)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Open the system log with the given ident, option, and, facility.
+Open the system log with the given ident, option(s), and, facility.
 
 syslog(level, message)
 ^^^^^^^^^^^^^^^^^^^^^^
