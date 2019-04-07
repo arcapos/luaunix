@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 - 2018, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
+ * Copyright (c) 2016 - 2019, Micro Systems Marc Balmer, CH-5073 Gipf-Oberfrick
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <dirent.h>
+#include <errno.h>
+#include <string.h>
 
 #include "dirent.h"
 
@@ -39,10 +41,12 @@ unix_opendir(lua_State *L)
 	DIR *dirp;
 	DIR **dirpp;
 
-	dirp = opendir(luaL_checkstring(L, 1));
-	if (dirp == NULL)
+	if (!(dirp = opendir(luaL_checkstring(L, 1)))) {
 		lua_pushnil(L);
-	else {
+		lua_pushfstring(L, "%s: %s", lua_tostring(L, 1),
+		    strerror(errno));
+		return 2;
+	} else {
 		dirpp = lua_newuserdata(L, sizeof(DIR **));
 		*dirpp = dirp;
 		luaL_setmetatable(L, DIR_METATABLE);

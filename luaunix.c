@@ -96,6 +96,13 @@ unix_errno(lua_State *L)
 }
 
 static int
+unix_strerror(lua_State *L)
+{
+	lua_pushstring(L, strerror(luaL_checkinteger(L, 1)));
+	return 1;
+}
+
+static int
 unix_fork(lua_State *L)
 {
 	lua_pushinteger(L, fork());
@@ -532,46 +539,6 @@ static struct constant unix_constant[] = {
 	CONSTANT(SIGPWR),
 	CONSTANT(SIGSYS),
 
-	/* syslog options */
-	CONSTANT(LOG_CONS),
-	CONSTANT(LOG_NDELAY),
-	CONSTANT(LOG_NOWAIT),
-	CONSTANT(LOG_ODELAY),
-	CONSTANT(LOG_PERROR),
-	CONSTANT(LOG_PID),
-
-	/* syslog facilities */
-	CONSTANT(LOG_AUTH),
-	CONSTANT(LOG_AUTHPRIV),
-	CONSTANT(LOG_CRON),
-	CONSTANT(LOG_DAEMON),
-	CONSTANT(LOG_FTP),
-	CONSTANT(LOG_KERN),
-	CONSTANT(LOG_LOCAL0),
-	CONSTANT(LOG_LOCAL1),
-	CONSTANT(LOG_LOCAL2),
-	CONSTANT(LOG_LOCAL3),
-	CONSTANT(LOG_LOCAL4),
-	CONSTANT(LOG_LOCAL5),
-	CONSTANT(LOG_LOCAL6),
-	CONSTANT(LOG_LOCAL7),
-	CONSTANT(LOG_LPR),
-	CONSTANT(LOG_MAIL),
-	CONSTANT(LOG_NEWS),
-	CONSTANT(LOG_SYSLOG),
-	CONSTANT(LOG_USER),
-	CONSTANT(LOG_UUCP),
-
-	/* syslog levels */
-	CONSTANT(LOG_EMERG),
-	CONSTANT(LOG_ALERT),
-	CONSTANT(LOG_CRIT),
-	CONSTANT(LOG_ERR),
-	CONSTANT(LOG_WARNING),
-	CONSTANT(LOG_NOTICE),
-	CONSTANT(LOG_INFO),
-	CONSTANT(LOG_DEBUG),
-
 	{ NULL, 0 }
 };
 
@@ -584,6 +551,7 @@ luaopen_unix(lua_State *L)
 		{ "chdir",	unix_chdir },
 		{ "dup2",	unix_dup2 },
 		{ "errno",	unix_errno },
+		{ "strerror",	unix_strerror },
 		{ "fork",	unix_fork },
 		{ "kill",	unix_kill },
 		{ "getcwd",	unix_getcwd },

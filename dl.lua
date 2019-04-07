@@ -1,8 +1,8 @@
 local unix = require 'unix'
 
-local libm = unix.dlopen('/usr/lib64/libm.so.6', 'lazy')
-print(libm)
+local libm, error = unix.dlopen('/usr/lib64/libm.so.6', 'lazy')
+print(libm, error)
 
-local f = libm.floor
-print(f)
+local f, error = libm.floor
+print(f, error)
 print(unix.dlsym(libm, 'floor'))

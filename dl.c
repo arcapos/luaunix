@@ -61,19 +61,19 @@ static const char *dlopen_options[] = {
 int
 unix_dlopen(lua_State *L)
 {
-	void *p, **pp;
+	void *p, **u;
 	int n, flags;
 
 	for (flags = 0, n = 2; n <= lua_gettop(L); n++)
 		flags |= dlopen_flags[luaL_checkoption(L, n, NULL,
 		    dlopen_options)];
-
-	p = dlopen(luaL_checkstring(L, 1), flags);
-	if (!p)
-		return luaL_error(L, dlerror());
-	else {
-		pp = lua_newuserdata(L, sizeof(void **));
-		*pp = p;
+	if (!(p = dlopen(luaL_checkstring(L, 1), flags))) {
+		lua_pushnil(L);
+		lua_pushstring(L, dlerror());
+		return 2;
+	} else {
+		u = lua_newuserdata(L, sizeof(void **));
+		*u = p;
 		luaL_setmetatable(L, DL_METATABLE);
 	}
 	return 1;
@@ -92,10 +92,11 @@ unix_dlsym(lua_State *L)
 	void **p, **s, *symbol;
 
 	p = luaL_checkudata(L, 1, DL_METATABLE);
-	symbol = dlsym(*p, luaL_checkstring(L, 2));
-	if (!symbol)
-		return luaL_error(L, dlerror());
-	else {
+	if (!(symbol = dlsym(*p, luaL_checkstring(L, 2)))) {
+		lua_pushnil(L);
+		lua_pushstring(L, dlerror());
+		return 2;
+	} else {
 		s = lua_newuserdata(L, sizeof(void **));
 		*s = symbol;
 		luaL_setmetatable(L, DLSYM_METATABLE);
