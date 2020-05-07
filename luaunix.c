@@ -271,6 +271,14 @@ unix_stat(lua_State *L)
 }
 
 static int
+unix_mkdir(lua_State *L)
+{
+	lua_pushinteger(L, mkdir(luaL_checkstring(L, 1),
+	    luaL_checkinteger(L, 2)));
+	return 1;
+}
+
+static int
 unix_mkstemp(lua_State *L)
 {
 	int fd;
@@ -512,7 +520,7 @@ unix_set_info(lua_State *L)
 	lua_pushliteral(L, "Unix binding for Lua");
 	lua_settable(L, -3);
 	lua_pushliteral(L, "_VERSION");
-	lua_pushliteral(L, "unix 1.4.2");
+	lua_pushliteral(L, "unix 1.4.3");
 	lua_settable(L, -3);
 }
 
@@ -598,6 +606,7 @@ luaopen_unix(lua_State *L)
 		{ "chmod",	unix_chmod },
 		{ "rename",	unix_rename },
 		{ "stat",	unix_stat },
+		{ "mkdir" ,	unix_mkdir },
 		{ "mkstemp",	unix_mkstemp },
 		{ "ftruncate",	unix_ftruncate },
 
